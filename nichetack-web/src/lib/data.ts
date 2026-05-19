@@ -265,7 +265,8 @@ export const CREATOR: Creator = {
   curated: ["i01", "i06", "i07", "i11", "i14", "i18", "i09"],
 };
 
-/* Private notes — the quiet margin scribble on a saved item. */
+/* Private notes — the quiet margin scribble on a saved item. Seed values;
+   the store layers the user's edits on top. */
 export const ITEM_NOTES: Record<string, string> = {
   i01: "The 02 size, not the 01 — I already have the 01 somewhere.",
   i02: "Saved for a slow Sunday. Pairs well with the tatami walkthrough.",
@@ -274,7 +275,3 @@ export const ITEM_NOTES: Record<string, string> = {
   i13: "Only buy if it scores top-three in the next comparison round.",
   i16: "The price keeps sliding — wait for the spring resale drop.",
 };
-
-export function getNote(id: string): string | undefined {
-  return ITEM_NOTES[id];
-}

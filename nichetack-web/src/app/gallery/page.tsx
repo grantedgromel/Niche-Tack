@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { Tile } from "@/components/Tile";
 import { cn } from "@/lib/cn";
-import { ITEMS, type ItemState } from "@/lib/data";
+import { type ItemState } from "@/lib/data";
+import { useItems } from "@/lib/store";
 
 type Filter = "all" | ItemState;
 
@@ -18,32 +19,32 @@ const FILTERS: { key: Filter; label: string }[] = [
 ];
 
 export default function GalleryPage() {
+  const items = useItems();
   const [filter, setFilter] = useState<Filter>("all");
 
   const counts = useMemo<Record<Filter, number>>(() => {
     const c: Record<Filter, number> = {
-      all: ITEMS.length,
+      all: items.length,
       wishlist: 0,
       active: 0,
       purchased: 0,
       archived: 0,
     };
-    for (const item of ITEMS) c[item.state] += 1;
+    for (const item of items) c[item.state] += 1;
     return c;
-  }, []);
+  }, [items]);
 
   const wishlistTotal = useMemo(
     () =>
-      ITEMS.filter((i) => i.state === "wishlist").reduce(
-        (sum, i) => sum + (i.price ?? 0),
-        0,
-      ),
-    [],
+      items
+        .filter((i) => i.state === "wishlist")
+        .reduce((sum, i) => sum + (i.price ?? 0), 0),
+    [items],
   );
 
   const filtered = useMemo(
-    () => (filter === "all" ? ITEMS : ITEMS.filter((i) => i.state === filter)),
-    [filter],
+    () => (filter === "all" ? items : items.filter((i) => i.state === filter)),
+    [items, filter],
   );
 
   return (
@@ -59,7 +60,7 @@ export default function GalleryPage() {
         </div>
         <div className="mt-4 flex items-center gap-3 lg:mt-0 lg:flex-shrink-0 lg:pb-1">
           <span className="pill">
-            {ITEMS.length} items · ${wishlistTotal.toLocaleString()} in wishlist
+            {items.length} items · ${wishlistTotal.toLocaleString()} in wishlist
           </span>
           <Link
             href="/pairwise"

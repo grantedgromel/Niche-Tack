@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getItem, getNote, ITEMS } from "@/lib/data";
+import { getItem, ITEMS } from "@/lib/data";
 import { ItemDetail } from "./ItemDetail";
 
 export function generateStaticParams() {
@@ -15,5 +15,5 @@ export default async function ItemPage({
   const item = getItem(id);
   if (!item) notFound();
 
-  return <ItemDetail item={item} note={getNote(id)} />;
+  return <ItemDetail item={item} />;
 }

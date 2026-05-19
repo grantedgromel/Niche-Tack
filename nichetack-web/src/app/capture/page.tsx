@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
 import { cn } from "@/lib/cn";
+import { setItemState, setItemTags } from "@/lib/store";
 
 /* The capture demo item — the bouclé sofa, which lives in the gallery
    as i04. Capture is hardcoded to one worked example, like the prototype. */
@@ -71,7 +72,13 @@ export default function CapturePage() {
               onStartState={setStartState}
               tags={tags}
               onToggleTag={toggleTag}
-              onDone={() => setStep("done")}
+              onDone={() => {
+                // Persist the capture — the sofa lands in the gallery
+                // with the chosen lifecycle state and tags.
+                setItemState(CAPTURED.itemId, startState);
+                setItemTags(CAPTURED.itemId, tags);
+                setStep("done");
+              }}
             />
           )}
           {step === "done" && (
