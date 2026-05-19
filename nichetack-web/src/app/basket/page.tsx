@@ -16,11 +16,11 @@ export default function BasketPage() {
   const fitPct = Math.round(BASKET_FIT * 100);
 
   return (
-    <div className="mx-auto max-w-[1280px] px-8 py-10">
-      <div className="grid grid-cols-[440px_1fr] overflow-hidden rounded-2xl border border-line bg-bg-elev">
+    <div className="mx-auto max-w-[1280px] px-5 pb-28 pt-6 lg:px-8 lg:py-10">
+      <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-line bg-bg-elev lg:grid-cols-[440px_1fr]">
         {/* ─── Manifesto ─── */}
         <div
-          className="flex flex-col justify-between border-r border-line p-12"
+          className="flex flex-col justify-between border-b border-line p-7 lg:border-b-0 lg:border-r lg:p-12"
           style={{
             background:
               "linear-gradient(180deg, var(--accent-soft) 0%, transparent 62%)",
@@ -28,21 +28,21 @@ export default function BasketPage() {
         >
           <div>
             <p className="eyebrow">basket · march 18</p>
-            <h1 className="h-display mt-4 text-[64px]">
+            <h1 className="h-display mt-4 text-[40px] lg:text-[64px]">
               your ${BASKET_BUDGET},
               <br />
               <em className="h-it">considered</em>.
             </h1>
-            <p className="h-display mt-6 text-[21px] leading-snug text-ink-2">
+            <p className="h-display mt-5 text-[17px] leading-snug text-ink-2 lg:mt-6 lg:text-[21px]">
               Of the 18 things on your wishlist, four maximize what your gut
               picked most. Two trade-offs we&apos;re saving for later.
             </p>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-8 lg:mt-10">
             <div className="flex items-baseline justify-between">
               <span className="mono text-[11px] text-ink-3">total</span>
-              <span className="h-display text-[46px] leading-none">
+              <span className="h-display text-[36px] leading-none lg:text-[46px]">
                 ${total.toLocaleString()}
               </span>
             </div>
@@ -66,8 +66,8 @@ export default function BasketPage() {
         </div>
 
         {/* ─── The four items ─── */}
-        <div className="flex flex-col gap-7 p-11">
-          <div className="grid grid-cols-2 gap-7">
+        <div className="flex flex-col gap-6 p-6 lg:gap-7 lg:p-11">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-7">
             {basket.map((item, idx) => (
               <Link
                 key={item.id}

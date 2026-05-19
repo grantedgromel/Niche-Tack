@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { DEFAULT_THEME, THEME_INIT_SCRIPT } from "@/lib/theme";
+import { BottomNav } from "@/components/BottomNav";
 import { TopBar } from "@/components/TopBar";
 
 const instrumentSerif = Instrument_Serif({
@@ -42,6 +43,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <TopBar />
         <main className="flex-1">{children}</main>
+        <BottomNav />
       </body>
     </html>
   );

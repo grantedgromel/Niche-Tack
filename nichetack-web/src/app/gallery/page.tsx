@@ -47,43 +47,48 @@ export default function GalleryPage() {
   );
 
   return (
-    <div className="mx-auto max-w-[1480px] px-8">
-      <header className="flex items-end justify-between gap-10 border-b border-line py-9">
+    <div className="mx-auto max-w-[1480px] px-5 lg:px-8">
+      <header className="border-b border-line py-7 lg:flex lg:items-end lg:justify-between lg:gap-10 lg:py-9">
         <div>
-          <p className="eyebrow mb-3">nichetack — everything you&apos;ve saved</p>
-          <h1 className="h-display text-[58px]">
+          <p className="eyebrow mb-2.5 lg:mb-3">
+            nichetack — everything you&apos;ve saved
+          </p>
+          <h1 className="h-display text-[34px] lg:text-[58px]">
             things i&apos;m <em className="h-it">considering</em>.
           </h1>
         </div>
-        <div className="flex flex-shrink-0 items-center gap-3 pb-1">
+        <div className="mt-4 flex items-center gap-3 lg:mt-0 lg:flex-shrink-0 lg:pb-1">
           <span className="pill">
             {ITEMS.length} items · ${wishlistTotal.toLocaleString()} in wishlist
           </span>
-          <Link href="/pairwise" className="btn gap-2 px-5 py-3 text-[13px]">
+          <Link
+            href="/pairwise"
+            className="btn hidden gap-2 px-5 py-3 text-[13px] lg:inline-flex"
+          >
             <Icon name="swap" size={16} />
             Play comparison
           </Link>
         </div>
       </header>
 
-      <div className="flex items-center gap-2 py-6">
+      <div className="flex items-center gap-2 overflow-x-auto py-5 lg:py-6">
         {FILTERS.map((f) => (
           <button
             key={f.key}
             type="button"
             onClick={() => setFilter(f.key)}
             aria-pressed={filter === f.key}
-            className={cn("pill", filter === f.key && "on")}
+            className={cn("pill shrink-0", filter === f.key && "on")}
           >
             {f.label} · {counts[f.key]}
           </button>
         ))}
-        <span className="mono ml-auto text-[11px] text-ink-3">
+        <span className="mono ml-auto hidden shrink-0 text-[11px] text-ink-3 lg:inline">
           {filtered.length} shown · sorted by recency
         </span>
       </div>
 
-      <div className="masonry pb-24">
+      <div className="masonry pb-28 lg:pb-24">
         {filtered.map((item) => (
           <Tile key={item.id} item={item} />
         ))}

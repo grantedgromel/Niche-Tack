@@ -36,16 +36,16 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg-elev">
-      <div className="mx-auto flex h-16 max-w-[1480px] items-center justify-between gap-8 px-8">
+      <div className="mx-auto flex h-16 max-w-[1480px] items-center justify-between gap-8 px-5 lg:px-8">
         <div className="flex items-center gap-9">
           <Link
             href="/gallery"
-            className="h-display h-it text-[26px] leading-none text-ink"
+            className="h-display h-it text-[22px] leading-none text-ink lg:text-[26px]"
           >
             Nichetack
           </Link>
 
-          <nav className="flex items-center gap-7">
+          <nav className="hidden items-center gap-7 lg:flex">
             {NAV.map((item) => {
               const active = item.isActive(pathname);
               return (
@@ -71,7 +71,7 @@ export function TopBar() {
           <ThemeToggle />
           <Link
             href="/capture"
-            className="btn gap-1.5 px-4 py-2.5 text-[13px]"
+            className="btn hidden gap-1.5 px-4 py-2.5 text-[13px] lg:inline-flex"
           >
             <Icon name="plus" size={15} sw={2} />
             Capture

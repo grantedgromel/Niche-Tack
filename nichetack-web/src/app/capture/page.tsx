@@ -40,11 +40,14 @@ export default function CapturePage() {
         style={{ background: "oklch(0 0 0 / 0.5)" }}
       />
 
-      <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-8 py-12">
+      <div className="relative flex min-h-[calc(100vh-4rem)] items-end justify-center lg:items-center lg:px-8 lg:py-12">
         <div
-          className="w-[440px] overflow-hidden rounded-2xl border border-line bg-bg-elev"
+          className="w-full overflow-hidden rounded-t-2xl border border-line bg-bg-elev lg:w-[440px] lg:rounded-2xl"
           style={{ boxShadow: "var(--shadow-lift)" }}
         >
+          {/* grab handle (mobile sheet) */}
+          <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-ink-3/40 lg:hidden" />
+
           {/* popover handle bar */}
           <div className="flex items-center gap-2 border-b border-line px-5 py-3.5">
             <span className="h-display h-it text-[17px] leading-none">
@@ -286,17 +289,17 @@ function SourceBackdrop() {
             <span className="size-2.5 rounded-full bg-ink-3/40" />
             <span className="size-2.5 rounded-full bg-ink-3/40" />
           </span>
-          <span className="mono rounded-full border border-line bg-bg px-3 py-1 text-[11px] text-ink-3">
+          <span className="mono truncate rounded-full border border-line bg-bg px-3 py-1 text-[11px] text-ink-3">
             instagram.com/studio.oma
           </span>
         </div>
         {/* post */}
-        <div className="grid grid-cols-[1.4fr_1fr]">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr]">
           <div
-            className="h-[380px] w-full"
+            className="h-[240px] w-full lg:h-[380px]"
             style={{ background: seededGradient("sofa3") }}
           />
-          <div className="border-l border-line p-6">
+          <div className="hidden border-l border-line p-6 lg:block">
             <div className="flex items-center gap-2.5">
               <span
                 className="size-9 rounded-full"
