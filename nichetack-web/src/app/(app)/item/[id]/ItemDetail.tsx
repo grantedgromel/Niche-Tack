@@ -1,19 +1,23 @@
 "use client";
 
-import { type KeyboardEvent, useState } from "react";
+import {
+  type KeyboardEvent,
+  useOptimistic,
+  useState,
+  useTransition,
+} from "react";
 import Link from "next/link";
+import {
+  setItemNoteAction,
+  setItemStateAction,
+  setItemTagsAction,
+} from "@/app/(app)/actions";
 import { Icon } from "@/components/Icon";
 import { LifecycleMarker } from "@/components/LifecycleMarker";
 import { PriceSpark } from "@/components/PriceSpark";
 import { seededGradient } from "@/lib/art";
 import { cn } from "@/lib/cn";
 import { STATE_LABEL_SHORT, type Item, type ItemState } from "@/lib/data";
-import {
-  setItemNote,
-  setItemState,
-  setItemTags,
-  useResolvedItem,
-} from "@/lib/store";
 
 const STATE_OPTIONS: { key: ItemState; label: string }[] = [
   { key: "wishlist", label: "Wishlist" },
@@ -22,8 +26,11 @@ const STATE_OPTIONS: { key: ItemState; label: string }[] = [
   { key: "archived", label: "Archived" },
 ];
 
-export function ItemDetail({ item: base }: { item: Item }) {
-  const { item, note } = useResolvedItem(base);
+export function ItemDetail({ item }: { item: Item }) {
+  const [, startTransition] = useTransition();
+  const [state, setOptimisticState] = useOptimistic(item.state);
+  const [tags, setOptimisticTags] = useOptimistic(item.tags ?? []);
+  const [noteDraft, setNoteDraft] = useState(item.note ?? "");
   const [addingTag, setAddingTag] = useState(false);
   const [tagDraft, setTagDraft] = useState("");
 
@@ -33,19 +40,33 @@ export function ItemDetail({ item: base }: { item: Item }) {
       ? history[history.length - 1] - history[0]
       : 0;
   const sourceName = item.source.split("·")[0].trim();
-  const tags = item.tags ?? [];
 
-  const removeTag = (tag: string) =>
-    setItemTags(
-      item.id,
-      tags.filter((t) => t !== tag),
-    );
+  function changeState(next: ItemState) {
+    startTransition(async () => {
+      setOptimisticState(next);
+      await setItemStateAction(item.id, next);
+    });
+  }
+
+  function changeTags(next: string[]) {
+    startTransition(async () => {
+      setOptimisticTags(next);
+      await setItemTagsAction(item.id, next);
+    });
+  }
+
+  function saveNote() {
+    if (noteDraft === (item.note ?? "")) return;
+    startTransition(async () => {
+      await setItemNoteAction(item.id, noteDraft);
+    });
+  }
 
   const onTagKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const next = tagDraft.trim().toLowerCase();
-      if (next && !tags.includes(next)) setItemTags(item.id, [...tags, next]);
+      if (next && !tags.includes(next)) changeTags([...tags, next]);
       setTagDraft("");
     } else if (e.key === "Escape") {
       setAddingTag(false);
@@ -75,18 +96,18 @@ export function ItemDetail({ item: base }: { item: Item }) {
                 className="h-full w-full"
                 style={{ background: seededGradient(item.seed) }}
               />
-              <LifecycleMarker state={item.state} />
+              <LifecycleMarker state={state} />
             </div>
             <div className="mt-3 flex items-center justify-between">
               <span className="eyebrow">{item.kind}</span>
-              <span className="eyebrow">{STATE_LABEL_SHORT[item.state]}</span>
+              <span className="eyebrow">{STATE_LABEL_SHORT[state]}</span>
             </div>
           </div>
         </div>
 
         {/* ─── Content ─── */}
         <div className="lg:max-w-[470px]">
-          <p className="eyebrow mb-2.5">{item.source} · saved 3 weeks ago</p>
+          <p className="eyebrow mb-2.5">{item.source} · saved recently</p>
           <h1 className="h-display mb-5 text-[32px] lg:mb-6 lg:text-[42px]">
             {item.title}
           </h1>
@@ -122,16 +143,16 @@ export function ItemDetail({ item: base }: { item: Item }) {
             </div>
           ) : null}
 
-          {/* Lifecycle — writes through the store */}
+          {/* Lifecycle */}
           <p className="eyebrow mb-2.5">state</p>
           <div className="grid grid-cols-2 gap-1.5">
             {STATE_OPTIONS.map((option) => {
-              const on = item.state === option.key;
+              const on = state === option.key;
               return (
                 <button
                   key={option.key}
                   type="button"
-                  onClick={() => setItemState(item.id, option.key)}
+                  onClick={() => changeState(option.key)}
                   aria-pressed={on}
                   className={cn(
                     "flex items-center gap-2.5 rounded-[10px] border px-3.5 py-3 text-[13px] font-medium transition-colors",
@@ -147,14 +168,14 @@ export function ItemDetail({ item: base }: { item: Item }) {
             })}
           </div>
 
-          {/* Tags — editable */}
+          {/* Tags */}
           <p className="eyebrow mb-2.5 mt-7">your tags</p>
           <div className="flex flex-wrap items-center gap-1.5">
             {tags.map((tag) => (
               <button
                 key={tag}
                 type="button"
-                onClick={() => removeTag(tag)}
+                onClick={() => changeTags(tags.filter((t) => t !== tag))}
                 title={`Remove "${tag}"`}
                 className="pill transition-colors hover:border-ink-3"
               >
@@ -188,11 +209,12 @@ export function ItemDetail({ item: base }: { item: Item }) {
             )}
           </div>
 
-          {/* Note — editable, persisted */}
+          {/* Note — persists on blur */}
           <p className="eyebrow mb-2.5 mt-7">note</p>
           <textarea
-            value={note}
-            onChange={(e) => setItemNote(item.id, e.target.value)}
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            onBlur={saveNote}
             placeholder="Add a private note…"
             rows={2}
             className="panel h-display block w-full resize-y p-4 text-[16px] italic leading-snug text-ink-2 outline-none transition-colors placeholder:not-italic placeholder:text-ink-3 focus:border-ink-3"
@@ -210,7 +232,7 @@ export function ItemDetail({ item: base }: { item: Item }) {
             style={{ background: "var(--accent-soft)" }}
           >
             <div className="flex-1">
-              <p className="eyebrow mb-1">seen 0 times</p>
+              <p className="eyebrow mb-1">a quiet ritual</p>
               <p className="h-display text-[17px] leading-tight">
                 Compare against your other saves.
               </p>

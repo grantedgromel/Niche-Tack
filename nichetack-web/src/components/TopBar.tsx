@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "@/app/(auth)/actions";
 import { cn } from "@/lib/cn";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
@@ -67,7 +68,7 @@ export function TopBar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <ThemeToggle />
           <Link
             href="/capture"
@@ -76,6 +77,16 @@ export function TopBar() {
             <Icon name="plus" size={15} sw={2} />
             Capture
           </Link>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="icon-btn"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <Icon name="signout" size={16} />
+            </button>
+          </form>
         </div>
       </div>
     </header>

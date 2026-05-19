@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { setItemStateAction } from "@/app/(app)/actions";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
-import { ITEMS, type Item } from "@/lib/data";
-import { setItemState } from "@/lib/store";
-
-/* The pool — everything you're actively weighing. */
-const POOL: Item[] = ITEMS.filter(
-  (i) => i.state === "wishlist" || i.state === "active",
-);
+import type { Item } from "@/lib/data";
 
 /* Deterministic pair sequence — stable across server/client renders. */
-function buildPairs(rounds: number): [Item, Item][] {
-  const n = POOL.length;
+function buildPairs(pool: Item[], rounds: number): [Item, Item][] {
+  const n = pool.length;
   const pairs: [Item, Item][] = [];
   for (let k = 0; k < rounds; k++) {
     const a = k % n;
     let b = (k * 3 + 5) % n;
     if (b === a) b = (b + 1) % n;
-    pairs.push([POOL[a], POOL[b]]);
+    pairs.push([pool[a], pool[b]]);
   }
   return pairs;
 }
@@ -33,7 +29,7 @@ interface Choice {
 
 type Phase = "entry" | "round" | "exit";
 
-export default function PairwisePage() {
+export function PairwiseClient({ pool }: { pool: Item[] }) {
   const [phase, setPhase] = useState<Phase>("entry");
   const [pairs, setPairs] = useState<[Item, Item][]>([]);
   const [index, setIndex] = useState(0);
@@ -45,7 +41,7 @@ export default function PairwisePage() {
 
   function start(rounds: number) {
     busy.current = false;
-    setPairs(buildPairs(rounds));
+    setPairs(buildPairs(pool, Math.min(rounds, pool.length * 2)));
     setIndex(0);
     setHistory([]);
     setPicking(null);
@@ -77,9 +73,34 @@ export default function PairwisePage() {
     commit(null);
   }
 
-  if (phase === "entry") return <Entry onStart={start} />;
+  if (pool.length < 2) {
+    return (
+      <div className="mx-auto max-w-[640px] px-5 py-20 text-center">
+        <p className="eyebrow">a quiet ritual</p>
+        <h1 className="h-display mt-3 text-[40px]">
+          not enough to <em className="h-it">compare</em> yet.
+        </h1>
+        <p className="h-display mt-3 text-[17px] text-ink-2">
+          Save a couple more things to your wishlist, then come back to weigh
+          them.
+        </p>
+        <Link href="/gallery" className="btn mt-7">
+          Back to the gallery
+        </Link>
+      </div>
+    );
+  }
+
+  if (phase === "entry")
+    return <Entry onStart={start} poolSize={pool.length} />;
   if (phase === "exit")
-    return <Exit history={history} onReplay={() => setPhase("entry")} />;
+    return (
+      <Exit
+        history={history}
+        pool={pool}
+        onReplay={() => setPhase("entry")}
+      />
+    );
 
   return (
     <Round
@@ -94,7 +115,13 @@ export default function PairwisePage() {
 }
 
 /* ─── Entry — the calm invitation ─────────────────────────── */
-function Entry({ onStart }: { onStart: (rounds: number) => void }) {
+function Entry({
+  onStart,
+  poolSize,
+}: {
+  onStart: (rounds: number) => void;
+  poolSize: number;
+}) {
   const preview = [
     {
       seed: "trench1",
@@ -141,7 +168,7 @@ function Entry({ onStart }: { onStart: (rounds: number) => void }) {
       </div>
 
       <div className="mono mb-5 flex gap-3 text-[11px] uppercase tracking-[0.12em] text-ink-3">
-        <span>{POOL.length} in pool</span>
+        <span>{poolSize} in pool</span>
         <span>·</span>
         <span>~2 min</span>
         <span>·</span>
@@ -290,18 +317,23 @@ function Round({
 /* ─── Exit — what your gut said ───────────────────────────── */
 function Exit({
   history,
+  pool,
   onReplay,
 }: {
   history: Choice[];
+  pool: Item[];
   onReplay: () => void;
 }) {
+  const router = useRouter();
+  const [, startApply] = useTransition();
+  const applied = useRef(false);
+
   const picks = new Map<string, number>();
   const appeared = new Map<string, Item>();
   for (const h of history) {
     appeared.set(h.a.id, h.a);
     appeared.set(h.b.id, h.b);
-    if (h.chosenId)
-      picks.set(h.chosenId, (picks.get(h.chosenId) ?? 0) + 1);
+    if (h.chosenId) picks.set(h.chosenId, (picks.get(h.chosenId) ?? 0) + 1);
   }
   const pickCount = (id: string) => picks.get(id) ?? 0;
   const totalPicks = history.filter((h) => h.chosenId).length;
@@ -312,7 +344,7 @@ function Exit({
 
   const ranked = [...appeared.values()].sort(
     (x, y) =>
-      pickCount(y.id) - pickCount(x.id) || POOL.indexOf(x) - POOL.indexOf(y),
+      pickCount(y.id) - pickCount(x.id) || pool.indexOf(x) - pool.indexOf(y),
   );
   const podium = ranked.slice(0, 3);
   const risers = ranked.slice(0, 2);
@@ -321,16 +353,24 @@ function Exit({
     .filter((it) => pickCount(it.id) === 0)
     .slice(0, 2);
 
-  // The round's verdict is applied for real — risers move to Considering,
+  // The verdict is applied for real, once — risers move to Considering,
   // fallers to Archived — so playing actually re-sorts the wishlist.
   const riserIds = risers.map((i) => i.id).join(",");
   const fallerIds = fallers.map((i) => i.id).join(",");
   useEffect(() => {
-    for (const id of riserIds.split(",").filter(Boolean))
-      setItemState(id, "active");
-    for (const id of fallerIds.split(",").filter(Boolean))
-      setItemState(id, "archived");
-  }, [riserIds, fallerIds]);
+    if (applied.current) return;
+    applied.current = true;
+    const up = riserIds.split(",").filter(Boolean);
+    const down = fallerIds.split(",").filter(Boolean);
+    if (up.length === 0 && down.length === 0) return;
+    startApply(async () => {
+      await Promise.all([
+        ...up.map((id) => setItemStateAction(id, "active")),
+        ...down.map((id) => setItemStateAction(id, "archived")),
+      ]);
+      router.refresh();
+    });
+  }, [riserIds, fallerIds, router, startApply]);
 
   // podium display order: 2nd · 1st · 3rd, with the winner raised
   const display =
@@ -358,17 +398,13 @@ function Exit({
               href={`/item/${item.id}`}
               className="flex flex-1 flex-col items-center"
             >
-              <span className="mono mb-2 text-[11px] text-ink-3">
-                0{rank}
-              </span>
+              <span className="mono mb-2 text-[11px] text-ink-3">0{rank}</span>
               <div
                 className="relative w-full overflow-hidden rounded-[10px]"
                 style={{
                   height: podiumHeight(rank),
                   boxShadow:
-                    rank === 1
-                      ? "var(--shadow-lift)"
-                      : "var(--shadow-card)",
+                    rank === 1 ? "var(--shadow-lift)" : "var(--shadow-card)",
                 }}
               >
                 <div
@@ -430,7 +466,12 @@ function Exit({
               />
             ))}
             {fallers.map((item) => (
-              <MoverRow key={item.id} item={item} to="Archived" delta="0 picks" />
+              <MoverRow
+                key={item.id}
+                item={item}
+                to="Archived"
+                delta="0 picks"
+              />
             ))}
           </div>
         </div>
