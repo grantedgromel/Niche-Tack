@@ -33,7 +33,7 @@ export function ItemDetail({ item, note }: ItemDetailProps) {
   const tags = item.tags ?? ["unsorted"];
 
   return (
-    <div className="mx-auto max-w-[1180px] px-8 pb-28 pt-8">
+    <div className="mx-auto max-w-[1180px] px-5 pb-28 pt-6 lg:px-8 lg:pt-8">
       <Link
         href="/gallery"
         className="link-quiet mono inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em]"
@@ -42,10 +42,10 @@ export function ItemDetail({ item, note }: ItemDetailProps) {
         Gallery
       </Link>
 
-      <div className="mt-6 grid grid-cols-[1.05fr_1fr] gap-14">
+      <div className="mt-5 grid grid-cols-1 gap-8 lg:mt-6 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
         {/* ─── Image ─── */}
         <div>
-          <div className="sticky top-[88px]">
+          <div className="lg:sticky lg:top-[88px]">
             <div
               className="relative w-full overflow-hidden rounded-2xl bg-bg-tile"
               style={{ aspectRatio: item.ar, maxHeight: "78vh" }}
@@ -64,15 +64,17 @@ export function ItemDetail({ item, note }: ItemDetailProps) {
         </div>
 
         {/* ─── Content ─── */}
-        <div className="max-w-[470px]">
+        <div className="lg:max-w-[470px]">
           <p className="eyebrow mb-2.5">{item.source} · saved 3 weeks ago</p>
-          <h1 className="h-display mb-6 text-[42px]">{item.title}</h1>
+          <h1 className="h-display mb-5 text-[32px] lg:mb-6 lg:text-[42px]">
+            {item.title}
+          </h1>
 
           {item.price != null ? (
             <div className="mb-7 flex items-end justify-between gap-5">
               <div>
                 <p className="eyebrow mb-1.5">current price</p>
-                <div className="h-display text-[38px] leading-none">
+                <div className="h-display text-[32px] leading-none lg:text-[38px]">
                   ${item.price.toLocaleString()}
                 </div>
                 {lastChange !== 0 && (
@@ -93,7 +95,7 @@ export function ItemDetail({ item, note }: ItemDetailProps) {
           ) : item.readTime ? (
             <div className="mb-7">
               <p className="eyebrow mb-1.5">{item.kind}</p>
-              <div className="h-display text-[30px] leading-none">
+              <div className="h-display text-[26px] leading-none lg:text-[30px]">
                 {item.readTime} min read
               </div>
             </div>

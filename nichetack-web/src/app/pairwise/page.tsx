@@ -111,20 +111,20 @@ function Entry({ onStart }: { onStart: (rounds: number) => void }) {
   ];
 
   return (
-    <div className="mx-auto flex max-w-[640px] flex-col items-center px-8 py-16 text-center">
+    <div className="mx-auto flex max-w-[640px] flex-col items-center px-5 pb-28 pt-12 text-center lg:px-8 lg:py-16">
       <p className="eyebrow">a quiet ritual</p>
-      <h1 className="h-display mt-3 text-[60px]">
+      <h1 className="h-display mt-3 text-[44px] lg:text-[60px]">
         which one,
         <br />
         <em className="h-it">honestly</em>?
       </h1>
-      <p className="h-display mt-5 max-w-[440px] text-[19px] leading-snug text-ink-2">
+      <p className="h-display mt-5 max-w-[440px] text-[18px] leading-snug text-ink-2 lg:text-[19px]">
         We&apos;ll show you two saved items at a time. Pick the one your gut
         still reaches for. We&apos;ll quietly learn what your wishlist really
         wants.
       </p>
 
-      <div className="relative my-12 h-[320px] w-[256px]">
+      <div className="relative my-11 h-[300px] w-[240px] lg:my-12 lg:h-[320px] lg:w-[256px]">
         {preview.map((card) => (
           <div
             key={card.seed}
@@ -189,7 +189,7 @@ function Round({
   ];
 
   return (
-    <div className="mx-auto max-w-[940px] px-8 py-8">
+    <div className="mx-auto max-w-[940px] px-5 pb-28 pt-6 lg:px-8 lg:py-8">
       <div className="flex items-center justify-between">
         <Link href="/gallery" className="icon-btn" aria-label="Leave the game">
           <Icon name="close" size={16} />
@@ -210,11 +210,11 @@ function Round({
         ))}
       </div>
 
-      <p className="h-display mt-8 text-center text-[24px]">
+      <p className="h-display mt-7 text-center text-[20px] lg:mt-8 lg:text-[24px]">
         which one, <em className="h-it">honestly</em>?
       </p>
 
-      <div className="mt-5 grid grid-cols-2 gap-5">
+      <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
         {slots.map(({ slot, item }) => {
           const isPicked = picking === slot;
           const isOther = picking !== null && picking !== slot;
@@ -225,9 +225,8 @@ function Round({
               data-pair-card={slot}
               disabled={picking !== null}
               onClick={() => onPick(slot)}
-              className="relative overflow-hidden rounded-2xl text-left"
+              className="relative aspect-[16/11] overflow-hidden rounded-2xl text-left lg:aspect-[4/5]"
               style={{
-                aspectRatio: "4/5",
                 background: seededGradient(item.seed),
                 boxShadow: isPicked
                   ? "var(--shadow-lift)"
@@ -328,9 +327,9 @@ function Exit({
     rank === 1 ? 196 : rank === 2 ? 152 : 128;
 
   return (
-    <div className="mx-auto max-w-[720px] px-8 py-12">
+    <div className="mx-auto max-w-[720px] px-5 pb-28 pt-10 lg:px-8 lg:py-12">
       <p className="eyebrow">round complete · {history.length} rounds</p>
-      <h1 className="h-display mt-2.5 text-[40px]">
+      <h1 className="h-display mt-2.5 text-[32px] lg:text-[40px]">
         here&apos;s what your <em className="h-it">gut</em> said.
       </h1>
       <p className="mono mt-2 text-[11px] text-ink-3">
@@ -338,7 +337,7 @@ function Exit({
       </p>
 
       {/* Podium */}
-      <div className="mt-9 flex items-end justify-center gap-4">
+      <div className="mt-8 flex items-end justify-center gap-3 lg:mt-9 lg:gap-4">
         {display.map((item) => {
           const rank = podium.indexOf(item) + 1;
           return (
@@ -376,7 +375,7 @@ function Exit({
                   </span>
                 )}
               </div>
-              <div className="h-display mt-2.5 text-center text-[15px] leading-tight">
+              <div className="h-display mt-2.5 text-center text-[13px] leading-tight lg:text-[15px]">
                 {item.title}
               </div>
               <div className="mono mt-1 text-[10px] text-ink-3">
@@ -388,9 +387,9 @@ function Exit({
       </div>
 
       {/* Insight */}
-      <div className="panel mt-9 p-5">
+      <div className="panel mt-8 p-5 lg:mt-9">
         <p className="eyebrow mb-2">quiet pattern</p>
-        <p className="h-display text-[19px] leading-snug">
+        <p className="h-display text-[18px] leading-snug lg:text-[19px]">
           {totalPicks === 0 ? (
             <>You skipped every round — there&apos;s no pattern to read yet.</>
           ) : (

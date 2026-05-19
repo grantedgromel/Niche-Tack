@@ -27,7 +27,7 @@ export function ThemeToggle() {
             title={meta.tagline}
             onClick={() => setTheme(value)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-colors",
+              "flex items-center gap-1.5 rounded-full px-2 py-1.5 transition-colors lg:px-2.5",
               on ? "bg-ink text-bg" : "text-ink-3 hover:text-ink",
             )}
           >
@@ -36,9 +36,10 @@ export function ThemeToggle() {
               className="size-2 rounded-full ring-1 ring-black/10"
               style={{ background: meta.accent }}
             />
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.1em]">
+            <span className="hidden font-mono text-[10px] font-medium uppercase tracking-[0.1em] lg:inline">
               {meta.label}
             </span>
+            <span className="sr-only">{meta.label}</span>
           </button>
         );
       })}

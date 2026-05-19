@@ -25,9 +25,9 @@ export default function CreatorPage() {
   const earns = Math.round(total * 0.09);
 
   return (
-    <div className="mx-auto max-w-[1060px] px-8 pb-24 pt-12">
+    <div className="mx-auto max-w-[1060px] px-5 pb-28 pt-10 lg:px-8 lg:pb-24 lg:pt-12">
       {/* ─── Creator header ─── */}
-      <header className="flex flex-col items-center border-b border-line pb-11 text-center">
+      <header className="flex flex-col items-center border-b border-line pb-9 text-center lg:pb-11">
         <div
           className="flex size-[72px] items-center justify-center rounded-full"
           style={{
@@ -42,7 +42,9 @@ export default function CreatorPage() {
             M
           </span>
         </div>
-        <h1 className="h-display mt-4 text-[32px]">{CREATOR.name}</h1>
+        <h1 className="h-display mt-4 text-[28px] lg:text-[32px]">
+          {CREATOR.name}
+        </h1>
         <p className="mono mt-1 text-[11px] text-ink-3">
           {CREATOR.handle} · {(CREATOR.followers / 1000).toFixed(1)}k followers
         </p>
@@ -58,9 +60,9 @@ export default function CreatorPage() {
       </header>
 
       {/* ─── Board intro ─── */}
-      <div className="mx-auto mt-11 max-w-[620px] text-center">
+      <div className="mx-auto mt-9 max-w-[620px] text-center lg:mt-11">
         <p className="eyebrow">a curated board · {curated.length} items</p>
-        <h2 className="h-display mt-2.5 text-[44px]">
+        <h2 className="h-display mt-2.5 text-[32px] lg:text-[44px]">
           things for the <em className="h-it">kitchen</em>, 2026.
         </h2>
         <p className="h-display mt-3 text-[16px] leading-snug text-ink-2">
@@ -71,7 +73,7 @@ export default function CreatorPage() {
 
       {/* ─── Affiliate disclosure ─── */}
       <div
-        className="mx-auto mt-7 flex max-w-[520px] items-center justify-center gap-3 rounded-lg px-4 py-2.5"
+        className="mx-auto mt-7 flex max-w-[520px] flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-lg px-4 py-2.5"
         style={{ background: "var(--accent-soft)" }}
       >
         <span
@@ -89,7 +91,7 @@ export default function CreatorPage() {
       </div>
 
       {/* ─── Curated grid ─── */}
-      <div className="mt-9 grid grid-cols-3 gap-7">
+      <div className="mt-9 grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-3 lg:gap-7">
         {curated.map((item, idx) => {
           const isBuyable = item.price != null;
           return (
@@ -105,7 +107,7 @@ export default function CreatorPage() {
               </Link>
               <p className="eyebrow mt-3">{item.source.split("·")[0].trim()}</p>
               <Link href={`/item/${item.id}`}>
-                <h3 className="h-display mt-1 text-[19px] leading-tight">
+                <h3 className="h-display mt-1 text-[16px] leading-tight lg:text-[19px]">
                   {item.title}
                 </h3>
               </Link>
@@ -132,7 +134,7 @@ export default function CreatorPage() {
       </div>
 
       {/* ─── Whole-basket CTA ─── */}
-      <div className="mx-auto mt-11 max-w-[420px] text-center">
+      <div className="mx-auto mt-10 max-w-[420px] text-center lg:mt-11">
         <button type="button" className="btn accent w-full py-4">
           <Icon name="basket" size={17} />
           Buy whole basket · ${total.toLocaleString()}
