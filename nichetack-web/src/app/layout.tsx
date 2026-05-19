@@ -23,7 +23,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nichetack — personal commerce CRM",
+  metadataBase: new URL("https://nichetack.vercel.app"),
+  title: {
+    default: "Nichetack — personal commerce CRM",
+    template: "%s · Nichetack",
+  },
   description:
     "A calm home for everything you've saved across the web — weigh it, rank it, decide.",
 };

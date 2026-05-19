@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FollowButton } from "@/components/FollowButton";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
 import { CREATOR, getItem, type Item } from "@/lib/data";
+
+export const metadata: Metadata = {
+  title: "Creator",
+  description: `${CREATOR.boardName} — a curated, affiliate-linked board by ${CREATOR.name}.`,
+};
 
 /* Mira's note on each curated item, index-matched to CREATOR.curated. */
 const CURATOR_NOTES = [
