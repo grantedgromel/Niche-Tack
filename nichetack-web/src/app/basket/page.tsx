@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
@@ -7,6 +8,11 @@ import {
   basketTotal,
   getBasket,
 } from "@/lib/basket";
+
+export const metadata: Metadata = {
+  title: "Basket",
+  description: "Your budget, considered — the items to buy and the ones to wait on.",
+};
 
 export default function BasketPage() {
   const basket = getBasket();
