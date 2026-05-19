@@ -4,22 +4,44 @@ import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
 import {
   BASKET_BUDGET,
-  BASKET_FIT,
+  basketCutItems,
   basketTotal,
-  getBasket,
+  selectBasket,
 } from "@/lib/basket";
+import { getItems } from "@/lib/items";
 
 export const metadata: Metadata = {
   title: "Basket",
-  description: "Your budget, considered — the items to buy and the ones to wait on.",
+  description:
+    "Your budget, considered — the items to buy and the ones to wait on.",
 };
 
-export default function BasketPage() {
-  const basket = getBasket();
+export default async function BasketPage() {
+  const items = await getItems();
+  const basket = selectBasket(items);
   const total = basketTotal(basket);
   const remaining = BASKET_BUDGET - total;
-  const spentPct = Math.round((total / BASKET_BUDGET) * 100);
-  const fitPct = Math.round(BASKET_FIT * 100);
+  const spentPct = Math.min(100, Math.round((total / BASKET_BUDGET) * 100));
+  const wishlistCount = items.filter((i) => i.state === "wishlist").length;
+  const cut = basketCutItems(items, basket);
+
+  if (basket.length === 0) {
+    return (
+      <div className="mx-auto max-w-[680px] px-5 py-24 text-center lg:py-32">
+        <p className="eyebrow">basket</p>
+        <h1 className="h-display mt-3 text-[40px] lg:text-[52px]">
+          nothing to <em className="h-it">basket</em> yet.
+        </h1>
+        <p className="h-display mt-3 text-[17px] leading-snug text-ink-2">
+          Add a few priced things to your wishlist and Nichetack will work out
+          what fits inside ${BASKET_BUDGET}.
+        </p>
+        <Link href="/gallery" className="btn mt-7">
+          Back to the gallery
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[1280px] px-5 pb-28 pt-6 lg:px-8 lg:py-10">
@@ -33,15 +55,17 @@ export default function BasketPage() {
           }}
         >
           <div>
-            <p className="eyebrow">basket · march 18</p>
+            <p className="eyebrow">your basket</p>
             <h1 className="h-display mt-4 text-[40px] lg:text-[64px]">
               your ${BASKET_BUDGET},
               <br />
               <em className="h-it">considered</em>.
             </h1>
             <p className="h-display mt-5 text-[17px] leading-snug text-ink-2 lg:mt-6 lg:text-[21px]">
-              Of the 18 things on your wishlist, four maximize what your gut
-              picked most. Two trade-offs we&apos;re saving for later.
+              Of the {wishlistCount}{" "}
+              {wishlistCount === 1 ? "thing" : "things"} on your wishlist,{" "}
+              {basket.length} fit inside the budget — cheapest first, nothing
+              over ${BASKET_BUDGET}.
             </p>
           </div>
 
@@ -60,18 +84,16 @@ export default function BasketPage() {
             </div>
             <div className="mono mt-2 flex justify-between text-[11px] text-ink-3">
               <span>of ${BASKET_BUDGET} budget</span>
-              <span>
-                ${remaining} unspent · {fitPct}% fit
-              </span>
+              <span>${remaining.toLocaleString()} unspent</span>
             </div>
             <button type="button" className="btn mt-6 w-full py-4">
               <Icon name="basket" size={17} />
-              Open all four sources
+              Open all {basket.length} sources
             </button>
           </div>
         </div>
 
-        {/* ─── The four items ─── */}
+        {/* ─── The items ─── */}
         <div className="flex flex-col gap-6 p-6 lg:gap-7 lg:p-11">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-7">
             {basket.map((item, idx) => (
@@ -108,14 +130,16 @@ export default function BasketPage() {
             ))}
           </div>
 
-          <div className="panel p-5">
-            <p className="eyebrow mb-2">what we cut</p>
-            <p className="h-display text-[16px] leading-snug text-ink-2">
-              The Issey Miyake tote ($360) and Lemaire trench ($640) — both
-              scored high, but together they push you $500 over. We&apos;ll
-              resurface them next month.
-            </p>
-          </div>
+          {cut.length > 0 && (
+            <div className="panel p-5">
+              <p className="eyebrow mb-2">what we cut</p>
+              <p className="h-display text-[16px] leading-snug text-ink-2">
+                {cut.length} priced {cut.length === 1 ? "item" : "items"}{" "}
+                didn&apos;t fit this round: {cut.map((c) => c.title).join(", ")}.
+                They&apos;ll resurface as the budget frees up.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

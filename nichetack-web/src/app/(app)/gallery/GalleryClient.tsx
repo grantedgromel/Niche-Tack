@@ -6,7 +6,6 @@ import { Icon } from "@/components/Icon";
 import { Tile } from "@/components/Tile";
 import { cn } from "@/lib/cn";
 import { type Item, type ItemState } from "@/lib/data";
-import { useItems } from "@/lib/store";
 
 type Filter = "all" | ItemState;
 
@@ -28,8 +27,7 @@ function matchesQuery(item: Item, q: string): boolean {
   );
 }
 
-export default function GalleryPage() {
-  const items = useItems();
+export function GalleryClient({ items }: { items: Item[] }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
 

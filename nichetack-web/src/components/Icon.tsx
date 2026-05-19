@@ -27,7 +27,8 @@ const ICON_PATHS = {
   close: "M6 6l12 12M18 6L6 18",
   swap: "M7 4l-4 4 4 4M21 8H3M17 12l4 4-4 4M3 16h18",
   notes: "M5 4h14v16H5zM9 9h6M9 13h6M9 17h3",
-} as const;
+  signout: ["M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", "M16 17l5-5-5-5", "M21 12H9"],
+};
 
 export type IconName = keyof typeof ICON_PATHS;
 

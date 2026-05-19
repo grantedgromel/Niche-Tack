@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { createItemAction } from "@/app/(app)/actions";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
 import { cn } from "@/lib/cn";
-import { setItemState, setItemTags } from "@/lib/store";
 
-/* The capture demo item — the bouclé sofa, which lives in the gallery
-   as i04. Capture is hardcoded to one worked example, like the prototype. */
+/* The capture demo — a believable "browser extension detected this" payload.
+   On Done it is inserted as a real item in the signed-in user's stash. */
 const CAPTURED = {
-  itemId: "i04",
+  kind: "screenshot" as const,
   title: "Bouclé sofa, oat",
   source: "instagram · @studio.oma",
   seed: "sofa3",
+  ar: "4/5",
+  price: 2400,
   priceLabel: "~$2,400",
 };
 
@@ -27,11 +29,31 @@ export default function CapturePage() {
     "wishlist",
   );
   const [tags, setTags] = useState<string[]>(["sofa", "living-room"]);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const toggleTag = (tag: string) =>
     setTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
+
+  function finishCapture() {
+    startTransition(async () => {
+      const { id } = await createItemAction({
+        kind: CAPTURED.kind,
+        title: CAPTURED.title,
+        source: CAPTURED.source,
+        price: CAPTURED.price,
+        state: startState,
+        ar: CAPTURED.ar,
+        seed: CAPTURED.seed,
+        tags,
+        note: "",
+      });
+      setSavedId(id);
+      setStep("done");
+    });
+  }
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
@@ -72,23 +94,20 @@ export default function CapturePage() {
               onStartState={setStartState}
               tags={tags}
               onToggleTag={toggleTag}
-              onDone={() => {
-                // Persist the capture — the sofa lands in the gallery
-                // with the chosen lifecycle state and tags.
-                setItemState(CAPTURED.itemId, startState);
-                setItemTags(CAPTURED.itemId, tags);
-                setStep("done");
-              }}
+              onDone={finishCapture}
+              pending={pending}
             />
           )}
           {step === "done" && (
             <DoneStep
               startState={startState}
               tagCount={tags.length}
+              savedId={savedId}
               onAnother={() => {
                 setStep("detect");
                 setStartState("wishlist");
                 setTags(["sofa", "living-room"]);
+                setSavedId(null);
               }}
             />
           )}
@@ -143,18 +162,20 @@ function TagStep({
   tags,
   onToggleTag,
   onDone,
+  pending,
 }: {
   startState: "wishlist" | "active";
   onStartState: (s: "wishlist" | "active") => void;
   tags: string[];
   onToggleTag: (tag: string) => void;
   onDone: () => void;
+  pending: boolean;
 }) {
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="eyebrow mb-1">saved to nichetack</p>
+          <p className="eyebrow mb-1">saving to nichetack</p>
           <h2 className="h-display text-[24px]">
             quickly tag <em className="h-it">&amp; go</em>
           </h2>
@@ -230,8 +251,13 @@ function TagStep({
         })}
       </div>
 
-      <button type="button" className="btn mt-6 w-full" onClick={onDone}>
-        Done
+      <button
+        type="button"
+        className="btn mt-6 w-full"
+        onClick={onDone}
+        disabled={pending}
+      >
+        {pending ? "Saving…" : "Done"}
       </button>
     </div>
   );
@@ -241,10 +267,12 @@ function TagStep({
 function DoneStep({
   startState,
   tagCount,
+  savedId,
   onAnother,
 }: {
   startState: "wishlist" | "active";
   tagCount: number;
+  savedId: string | null;
   onAnother: () => void;
 }) {
   return (
@@ -264,7 +292,10 @@ function DoneStep({
       </p>
 
       <div className="mt-5 flex flex-col gap-2">
-        <Link href={`/item/${CAPTURED.itemId}`} className="btn w-full">
+        <Link
+          href={savedId ? `/item/${savedId}` : "/gallery"}
+          className="btn w-full"
+        >
           View the item
         </Link>
         <button type="button" className="btn ghost w-full" onClick={onAnother}>

@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getItem, ITEMS } from "@/lib/data";
+import { getItem } from "@/lib/items";
 import { ItemDetail } from "./ItemDetail";
-
-export function generateStaticParams() {
-  return ITEMS.map((item) => ({ id: item.id }));
-}
 
 export async function generateMetadata({
   params,
@@ -13,7 +9,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const item = getItem(id);
+  const item = await getItem(id);
   if (!item) return { title: "Not found" };
   return {
     title: item.title,
@@ -27,7 +23,7 @@ export default async function ItemPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = getItem(id);
+  const item = await getItem(id);
   if (!item) notFound();
 
   return <ItemDetail item={item} />;

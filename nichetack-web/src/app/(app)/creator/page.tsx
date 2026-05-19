@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { FollowButton } from "@/components/FollowButton";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
-import { CREATOR, getItem, type Item } from "@/lib/data";
+import { CREATOR, CREATOR_ITEMS } from "@/lib/creator-data";
 
 export const metadata: Metadata = {
   title: "Creator",
   description: `${CREATOR.boardName} — a curated, affiliate-linked board by ${CREATOR.name}.`,
 };
 
-/* Mira's note on each curated item, index-matched to CREATOR.curated. */
+/* Mira's note on each curated item, index-matched to CREATOR_ITEMS. */
 const CURATOR_NOTES = [
   "I use it every morning.",
   "Worth every penny.",
@@ -22,12 +21,8 @@ const CURATOR_NOTES = [
 ];
 
 export default function CreatorPage() {
-  const curated = CREATOR.curated
-    .map((id) => getItem(id))
-    .filter((item): item is Item => Boolean(item));
-
-  const total = curated.reduce((sum, item) => sum + (item.price ?? 0), 0);
-  const buyable = curated.filter((item) => item.price != null).length;
+  const total = CREATOR_ITEMS.reduce((sum, item) => sum + (item.price ?? 0), 0);
+  const buyable = CREATOR_ITEMS.filter((item) => item.price != null).length;
   const earns = Math.round(total * 0.09);
 
   return (
@@ -67,7 +62,9 @@ export default function CreatorPage() {
 
       {/* ─── Board intro ─── */}
       <div className="mx-auto mt-9 max-w-[620px] text-center lg:mt-11">
-        <p className="eyebrow">a curated board · {curated.length} items</p>
+        <p className="eyebrow">
+          a curated board · {CREATOR_ITEMS.length} items
+        </p>
         <h2 className="h-display mt-2.5 text-[32px] lg:text-[44px]">
           things for the <em className="h-it">kitchen</em>, 2026.
         </h2>
@@ -96,27 +93,23 @@ export default function CreatorPage() {
         </span>
       </div>
 
-      {/* ─── Curated grid ─── */}
+      {/* ─── Curated grid (display-only showcase) ─── */}
       <div className="mt-9 grid grid-cols-2 gap-x-5 gap-y-8 lg:grid-cols-3 lg:gap-7">
-        {curated.map((item, idx) => {
+        {CREATOR_ITEMS.map((item, idx) => {
           const isBuyable = item.price != null;
           return (
             <div key={item.id} className="flex flex-col">
-              <Link href={`/item/${item.id}`} className="block">
-                <div
-                  className="w-full rounded-xl"
-                  style={{
-                    aspectRatio: "4/5",
-                    background: seededGradient(item.seed),
-                  }}
-                />
-              </Link>
+              <div
+                className="w-full rounded-xl"
+                style={{
+                  aspectRatio: "4/5",
+                  background: seededGradient(item.seed),
+                }}
+              />
               <p className="eyebrow mt-3">{item.source.split("·")[0].trim()}</p>
-              <Link href={`/item/${item.id}`}>
-                <h3 className="h-display mt-1 text-[16px] leading-tight lg:text-[19px]">
-                  {item.title}
-                </h3>
-              </Link>
+              <h3 className="h-display mt-1 text-[16px] leading-tight lg:text-[19px]">
+                {item.title}
+              </h3>
               <p className="mono mt-1.5 text-[10px] italic leading-snug text-ink-2">
                 &ldquo;{CURATOR_NOTES[idx]}&rdquo;
               </p>
@@ -126,13 +119,13 @@ export default function CreatorPage() {
                 ) : (
                   <span className="mono text-[11px] text-ink-3">recipe</span>
                 )}
-                <Link
-                  href={`/item/${item.id}`}
+                <button
+                  type="button"
                   className="btn px-3.5 py-2 text-[12px]"
                 >
                   {isBuyable ? "Buy" : "View"}
                   <Icon name="arrowR" size={13} />
-                </Link>
+                </button>
               </div>
             </div>
           );
