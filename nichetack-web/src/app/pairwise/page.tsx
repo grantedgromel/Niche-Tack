@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { seededGradient } from "@/lib/art";
 import { ITEMS, type Item } from "@/lib/data";
+import { setItemState } from "@/lib/store";
 
 /* The pool — everything you're actively weighing. */
 const POOL: Item[] = ITEMS.filter(
@@ -319,6 +320,17 @@ function Exit({
     .reverse()
     .filter((it) => pickCount(it.id) === 0)
     .slice(0, 2);
+
+  // The round's verdict is applied for real — risers move to Considering,
+  // fallers to Archived — so playing actually re-sorts the wishlist.
+  const riserIds = risers.map((i) => i.id).join(",");
+  const fallerIds = fallers.map((i) => i.id).join(",");
+  useEffect(() => {
+    for (const id of riserIds.split(",").filter(Boolean))
+      setItemState(id, "active");
+    for (const id of fallerIds.split(",").filter(Boolean))
+      setItemState(id, "archived");
+  }, [riserIds, fallerIds]);
 
   // podium display order: 2nd · 1st · 3rd, with the winner raised
   const display =
