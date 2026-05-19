@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nichetack
 
-## Getting Started
+A personal commerce CRM — a calm home for everything you've saved across the
+web. Save products, articles, videos, screenshots and recipes; move them
+through a lifecycle (wishlist → considering → purchased → archived); weigh
+them two at a time to learn what your gut actually wants; and get a
+budget-aware basket of what to buy.
 
-First, run the development server:
+This is a **desktop-only production prototype**, converted from a vanilla
+React + Babel design handoff into a real Next.js App Router project.
+
+## Screens
+
+| Route         | Screen                                                          |
+| ------------- | --------------------------------------------------------------- |
+| `/gallery`    | Masonry of everything saved, filtered by lifecycle state        |
+| `/item/[id]`  | A single item — price history, lifecycle, tags, private note    |
+| `/pairwise`   | The comparison game: entry → rounds → ranked results            |
+| `/basket`     | A budget-aware "buy these four, archive the rest" recommendation |
+| `/capture`    | A browser-extension-style quick-capture popover                 |
+| `/creator`    | A public, affiliate-linked curated board                        |
+
+`/` redirects to `/gallery`.
+
+## Stack
+
+- Next.js 16 (App Router) + React 19
+- TypeScript
+- Tailwind CSS v4
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Other scripts:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build   # production build
+npm run start   # serve the production build
+npm run lint    # eslint
+```
 
-## Learn More
+## Theme system
 
-To learn more about Next.js, take a look at the following resources:
+Three themes — **Linen**, **Atelier**, and **Olive** — are defined as OKLCH
+CSS variable sets in `src/app/globals.css` and exposed to Tailwind as colour
+tokens. The active theme lives in a `data-theme` attribute on `<html>`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Switch it from the persistent control in the top bar.
+- The choice is saved to `localStorage` and re-applied before first paint by a
+  small inline script, so there is no flash of the default theme on reload.
+- Switching is instant — every surface reads the same CSS variables.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
+- **Desktop only.** There are no responsive breakpoints below ~1024px; mobile
+  is a later phase.
+- **Imagery is generated, not fetched.** Moodboard visuals are deterministic
+  OKLCH gradients seeded per item (`src/lib/art.ts`), so the prototype is
+  self-contained and depends on no external image host.
+- Data is mock and in-memory (`src/lib/data.ts`). Session-only state — lifecycle
+  edits, comparison picks — is intentionally not persisted.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/         routes — one folder per screen, plus layout and globals.css
+  components/  shared UI — top bar, theme toggle, tile, icons, sparkline
+  lib/         data, theme tokens, gradient art, basket logic
+```
